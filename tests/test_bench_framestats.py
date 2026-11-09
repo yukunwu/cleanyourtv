@@ -64,13 +64,13 @@ class FrameStatsTest(unittest.TestCase):
                     "dumpsys gfxinfo com.gathin.tvhome reset": "Uptime: 1000 Realtime: 1000\n",
                     "input keyevent 22": "",
                     "dumpsys gfxinfo com.gathin.tvhome framestats": stats,
-                    "logcat -d -b main":
+                    "logcat -d -b main -t 2000 | grep injectKeyEvent":
                         "injectKeyEvent action=ACTION_DOWN KEYCODE_DPAD_RIGHT eventTime=1000",
                 }
                 tv = mock.Mock()
                 tv.home_component.return_value = "com.gathin.tvhome/.MainActivity"
                 tv.package_of.return_value = "com.gathin.tvhome"
-                tv.shell.side_effect = answers.__getitem__
+                tv.shell.side_effect = lambda command, *, retry=False: answers[command]
                 with mock.patch.object(bench.time, "sleep"):
                     self.assertEqual(bench.measure_key(tv, 22), (20.0, 20.0, 2, 0))
 
